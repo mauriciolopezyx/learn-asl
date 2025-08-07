@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from "react-hook-form"
 import { Form } from "@/components/ui/form"
 import InputElement from "@/components/form-elements"
+import { useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -41,8 +42,15 @@ export function ResetPasswordForm({
   ...props
 }: React.ComponentProps<"div">) {
 
-    const router = useRouter() 
-    const [loading, setLoading] = useState<boolean>(false)
+    const router = useRouter()
+    const searchParams = useSearchParams()
+
+    const hasExistingPassword = searchParams.get("hasExisting") === "true"
+    const token = searchParams.get("token")
+    const email = searchParams.get("email")
+    const conditionalTitle = hasExistingPassword ? "Enter your current and newly chosen password:" : "Create your new password below:"
+    const endpoint = token ? "http://localhost:8080/auth/forgot-password/reset" : "http://localhost:8080/user/me/password"
+    // redirect will be /dashboard no matter what
 
     const [showOldPassword, setShowOldPassword] = useState<boolean>(false)
     const [showNewPassword, setShowNewPassword] = useState<boolean>(false)
@@ -61,23 +69,39 @@ export function ResetPasswordForm({
         }
     })
 
+    const {isPending:loading, isError, error, mutate} = useMutation({
+        mutationFn: async (values: z.infer<typeof formSchema>) => {
+            console.log("submitting reset password *Attempt*")
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    ...(hasExistingPassword && {oldPassword: values.old}),
+                    ...(token && {forgotToken: token}),
+                    ...(email && {email: email}),
+                    newPassword: values.new
+                })
+            })
+            if (!response.ok) {
+                const payload = await response.text()
+                throw new Error(payload)
+            }
+            toast.success("Successfully reset your password!")
+        },
+        onSuccess: () => {
+            router.push("/home")
+        },
+        onError: (e: any) => {
+            toast.error(e?.message ?? "Failed to register")
+        }
+    })
+
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        setLoading(true)
-        //const {success, message} = await signIn(values.email, values.password)
-        // if (success) {
-        //     toast.success(message as string)
-        //     router.push("/dashboard")
-        // } else {
-        //     toast.error(message as string)
-        // }
-        setLoading(false)
+        mutate(values)
     }
-    
-    // you'd probably perform a query here if they had a password previously or not. (You never had forgot password btw)
-    // FIRST MAKE THOSE THAT FORGOT PASSWORD VERIFY WITH CODE. if they don't have an email they can't do it
-    
-    const hasPassword = false
-    const conditionalTitle = hasPassword ? "Enter your current and newly chosen password:" : "Create your new password below:"
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -93,7 +117,7 @@ export function ResetPasswordForm({
                                 <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                                 </div>
                                 <div className="grid gap-6">
-                                    { hasPassword ? <div className="grid gap-3">
+                                    { hasExistingPassword ? <div className="grid gap-3">
                                         <Label htmlFor="old">Old Password</Label>
                                         <div className="w-full relative">
                                             <InputElement

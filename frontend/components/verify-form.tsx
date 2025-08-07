@@ -33,15 +33,20 @@ import {
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
-export function VerifyForm({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+export function VerifyForm() {
 
     const router = useRouter()
     const searchParams = useSearchParams()
 
     const verificationEmail = searchParams.get("email") ?? ""
+    const forgotPassword = searchParams.get("forgotPassword") === "true"
+
+    const verifyEndpoint = forgotPassword ? "http://localhost:8080/auth/forgot-password/code" : "http://localhost:8080/auth/verify"
+    const resendEndpoint = forgotPassword ? "http://localhost:8080/auth/forgot-password/code/resend" : "http://localhost:8080/auth/resend"
+    const redirectUrl = forgotPassword ? "/reset-password" : "/dashboard"
+
+    console.log("forget password?", forgotPassword)
+    
     function maskEmail(email: string) {
         const [local, domain] = email.split('@')
         if (!domain) return email
@@ -63,7 +68,7 @@ export function VerifyForm({
     const {isPending:loading, isError, error:verifyError, mutate:confirmMutate} = useMutation({
         mutationFn: async (values: z.infer<typeof formSchema>) => {
             console.log("submitting verify attempt")
-            const response = await fetch("http://localhost:8080/auth/verify", {
+            const response = await fetch(verifyEndpoint, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -78,10 +83,12 @@ export function VerifyForm({
                 const payload = await response.text()
                 throw new Error(payload)
             }
-            console.log(response)
+            const json = await response.json()
+            return json
         },
-        onSuccess: () => {
-            router.push(`/dashboard`)
+        onSuccess: (json) => {
+            const suffix = (json?.token && forgotPassword) ? `?token=${json.token}&email=${verificationEmail}` : ""
+            router.push(redirectUrl + suffix)
         },
         onError: (e: any) => {
             toast.error(e?.message ?? "Failed to verify")
@@ -91,12 +98,15 @@ export function VerifyForm({
     const {data:resendMessage, mutate:resendMutate} = useMutation({
         mutationFn: async () => {
             console.log("submitting resend code")
-            const response = await fetch(`http://localhost:8080/auth/resend?email=${verificationEmail}`, {
+            const response = await fetch(resendEndpoint, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                credentials: "include"
+                credentials: "include",
+                body: JSON.stringify({
+                    email: verificationEmail
+                })
             })
             if (!response.ok) {
                 const payload = await response.text()
@@ -122,7 +132,7 @@ export function VerifyForm({
     }
 
     return (
-        <div className={cn("flex flex-col gap-6", className)} {...props}>
+        <div className={cn("flex flex-col gap-6")}>
             <Card>
                 <CardHeader className="text-center mt-4">
                     <CardTitle className="text-xl">Verify</CardTitle>

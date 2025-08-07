@@ -1,3 +1,10 @@
 package com.backend.backend.user.dto;
 
-public record ResetPasswordDto(String oldPassword, String newPassword) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record ResetPasswordDto(
+        @NotBlank
+        String oldPassword,
+        @NotBlank
+        String newPassword
+) {}

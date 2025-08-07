@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -17,7 +18,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig{
+class SecurityConfig {
 
     private final AuthenticationProvider authenticationProvider;
     private final OAuth2Handler oAuth2Handler;
@@ -48,6 +49,7 @@ public class SecurityConfig{
                         .successHandler(oAuth2Handler)
                         .failureUrl("/login?error=oauth2_failed")
                 )
+                .securityContext(security -> security.securityContextRepository(new HttpSessionSecurityContextRepository()))
                 .authenticationProvider(authenticationProvider);
         return http.build();
     }

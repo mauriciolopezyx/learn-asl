@@ -43,6 +43,11 @@ public class User implements UserDetails {
     @Column(nullable=false)
     private Role role;
 
+    @Column(name="forgot_token")
+    private String forgotPasswordToken;
+    @Column(name="forgot_expiration")
+    private LocalDateTime forgotPasswordTokenExpiresAt;
+
     // regular signups
     public User(String username, String email, String password) {
         this.username = username;
@@ -110,6 +115,22 @@ public class User implements UserDetails {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getForgotPasswordToken() {
+        return forgotPasswordToken;
+    }
+
+    public void setForgotPasswordToken(String forgotPasswordToken) {
+        this.forgotPasswordToken = forgotPasswordToken;
+    }
+
+    public LocalDateTime getForgotPasswordTokenExpiresAt() {
+        return forgotPasswordTokenExpiresAt;
+    }
+
+    public void setForgotPasswordTokenExpiresAt(LocalDateTime forgotPasswordTokenExpiresAt) {
+        this.forgotPasswordTokenExpiresAt = forgotPasswordTokenExpiresAt;
     }
 
     @Override
