@@ -49,6 +49,11 @@ class SecurityConfig {
                         .successHandler(oAuth2Handler)
                         .failureUrl("/login?error=oauth2_failed")
                 )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("SESSION")
+                )
                 .securityContext(security -> security.securityContextRepository(new HttpSessionSecurityContextRepository()))
                 .authenticationProvider(authenticationProvider);
         return http.build();

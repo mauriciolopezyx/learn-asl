@@ -1,0 +1,12 @@
+services:
+  redis:
+    container_name: redis-asl
+    image: redis:alpine
+    volumes:
+      - redis_data:/data/learn-asl
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  redis_data:

@@ -88,9 +88,12 @@ class AuthService {
                         input.password()
                 )
         );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        // v needed now that we're stateful
-        SecurityContext context = SecurityContextHolder.getContext();
+
+        // v NEW setup with Redis session caching
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+        request.getSession(true); // make sure a session exists
         new HttpSessionSecurityContextRepository().saveContext(context, request, response);
 
         LoginResponseDto loginResponse = new LoginResponseDto(true);
@@ -129,9 +132,12 @@ class AuthService {
                 null,
                 user.getAuthorities()
         );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        // v needed now that we're stateful
-        SecurityContext context = SecurityContextHolder.getContext();
+
+        // v NEW setup with Redis session caching
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+        request.getSession(true); // make sure a session exists
         new HttpSessionSecurityContextRepository().saveContext(context, request, response);
 
         LoginResponseDto loginResponse = new LoginResponseDto(true);
@@ -264,9 +270,12 @@ class AuthService {
                 null,
                 user.getAuthorities()
         );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        // v needed now that we're stateful
-        SecurityContext context = SecurityContextHolder.getContext();
+
+        // v NEW setup with Redis session caching
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+        request.getSession(true); // make sure a session exists
         new HttpSessionSecurityContextRepository().saveContext(context, request, response);
 
         // not going to return the LoginResponse, it's kind of redundant in the first place at the moment (also, User Reset Password returns a string too)

@@ -27,7 +27,7 @@ export default function Topbar(
 
     const router = useRouter()
 
-    const {isPending:retrieveLoading, isError, error, mutate:resetPasswordMutate} = useMutation({
+    const {isPending:retrieveLoading, mutate:resetPasswordMutate} = useMutation({
         mutationFn: async () => {
             const response = await fetch("http://localhost:8080/user/me/password", {
                 method: "GET",
@@ -51,11 +51,34 @@ export default function Topbar(
         }
     })
 
+    const {isPending:logoutLoading, mutate:logoutMutate} = useMutation({
+        mutationFn: async () => {
+            const response = await fetch("http://localhost:8080/logout", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include"
+            })
+            if (!response.ok) {
+                const payload = await response.text()
+                throw new Error(payload)
+            }
+        },
+        onSuccess: () => {
+            console.log("Successfully logged out")
+            router.push("/login")
+        },
+        onError: (e: any) => {
+            toast.error(e?.message ?? "Failed to logout")
+        }
+    })
+
     return (
     <header className="sticky top-0 z-50 w-full border-b bg-white dark:border-gray-800 dark:bg-gray-950">
         <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
         <div className="flex-1">
-            <Link href="#" className="flex items-center gap-2 font-bold" prefetch={false}>
+            <Link href="/" className="flex items-center gap-2 font-bold" prefetch={false}>
                 <span>Learn ASL</span>
             </Link>
         </div>
@@ -109,16 +132,17 @@ export default function Topbar(
                             <span>Reset Password</span>
                             {retrieveLoading ? <Loader2 className="size-4 mx-auto animate-spin"/> : null}
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {logoutMutate()}}>
                             <MdExitToApp className="h-full" />
                             <span>Log Out</span>
+                            {logoutLoading ? <Loader2 className="size-4 mx-auto animate-spin"/> : null}
                         </DropdownMenuItem>
                     </>
                     :
                     <>
                         <DropdownMenuItem>
-                            <CgDanger />
                             <Link href="/login">
+                                <CgDanger className="inline mr-2" />
                                 <span>{"Login to continue"}</span>
                             </Link>
                         </DropdownMenuItem>

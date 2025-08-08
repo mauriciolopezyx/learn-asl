@@ -6,7 +6,7 @@ import Topbar from "@/components/topbar"
 
 import { Loader2 } from "lucide-react"
 
-export default function HomeLayout({children}: {children: ReactNode}) {
+export default function LessonsLayout({children}: {children: ReactNode}) {
 
     const {authenticated, queryComplete} = useAuthRedirect()
 
@@ -25,5 +25,5 @@ export default function HomeLayout({children}: {children: ReactNode}) {
             }
         </>
     )
-
+    
 }
