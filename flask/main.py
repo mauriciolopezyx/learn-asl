@@ -62,8 +62,7 @@ def default_page():
 def predict():
     image = request.files["imagefile"]
     image_path = os.path.join("images", image.filename)
-    image.save(image_path)
-
+    
     # preprocess image
     img = Image.open(image_path).convert("L")
     transform = transforms.Compose([
