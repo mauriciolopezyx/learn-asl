@@ -8,7 +8,9 @@ import { Loader2 } from "lucide-react"
 
 export default function HomeLayout({children}: {children: ReactNode}) {
 
-    const {authenticated, queryComplete} = useAuthRedirect()
+    //const {authenticated, queryComplete} = useAuthRedirect()
+    const authenticated = true
+    const queryComplete = true
 
     return (
         <>

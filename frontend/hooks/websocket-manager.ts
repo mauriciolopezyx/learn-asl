@@ -1,45 +1,116 @@
 import SockJS from "sockjs-client"
 import { Client, IMessage } from "@stomp/stompjs"
-import { useRef, useEffect } from "react"
 
-// TODO: fix 8/14+
-const URL = "http://localhost:8080/"
+export type serverPrediction = {
+    confidence: number,
+    prediction: string
+}
 
-export function websocketManager() {
-    const clientRef = useRef<Client | null>(null)
+export type websocketConfig = {
+    endpoint: string,
+    frameRate: number,
+    quality: number,
+    width: number,
+    height: number
+}
 
-    const connect = () => {
-        if (clientRef.current?.connected) return
-        
-        const socket: WebSocket = new SockJS(URL)
+const SERVER_URL = "http://localhost:8080/ws-learn-asl"
+
+// client.subscribe(`/topic/lesson/${lesson}`, (message: IMessage) => {
+
+export class websocketManager {
+
+    private client: Client | null = null
+    private videoElement: HTMLVideoElement | null = null
+    private canvas: HTMLCanvasElement
+    private context: CanvasRenderingContext2D | null
+    private frameInterval: number | null = null
+    private config: websocketConfig
+    private streaming: boolean = false
+
+    constructor(config: websocketConfig) {
+        this.config = config
+        this.canvas = document.createElement("canvas")
+        this.context = this.canvas.getContext("2d")
+    }
+
+    public connect(videoElement: HTMLVideoElement, responseHandler?: (any: any) => void) {
+        this.videoElement = videoElement
+        const socket: WebSocket = new SockJS(SERVER_URL)
         const client = new Client({
             webSocketFactory: () => socket,
-            reconnectDelay: 5000
+            reconnectDelay: 5000,
+            onConnect: () => {
+                this.startStreaming()
+                client.subscribe(this.config.endpoint, (message: IMessage) => {
+                    const response = JSON.parse(message.body)
+                    console.log("rec response 1")
+                    if (!response) return
+                    console.log("rec response 2")
+                    if (response.wireframe) {
+                        console.log("rec response 3")
+                        const imgElement = document.getElementById("wireframe-display") as HTMLImageElement
+                        if (!imgElement) return
+                        imgElement.src = `data:image/jpeg;base64,${response.wireframe}`
+                    }
+
+                    if (responseHandler) {
+                        console.log("Received websocket response, invoking")
+                        responseHandler(response)
+                    }
+                })
+            }
         })
         
-        clientRef.current = client
-        client.activate()
+        this.client = client
+        this.client.activate()
     }
 
-    const disconnect = () => {
-        if (clientRef.current) {
-        clientRef.current.deactivate()
-        clientRef.current = null
+    public disconnect() {
+        if (!this.client) return
+
+        this.client.deactivate()
+        this.client = null
+        this.streaming = false
+
+        if (this.frameInterval) {
+            clearInterval(this.frameInterval)
+            this.frameInterval = null
         }
     }
 
-    const sendFrame = (frameData: string) => {
-        if (clientRef.current?.connected) {
-        clientRef.current.publish({
-            destination: '/app/video-frame',
-            body: frameData
-        })
-        }
+    public isStreaming() {
+        return this.streaming
     }
 
-    useEffect(() => {
-        return () => disconnect()
-    }, [])
+    /* ------------ */
 
-    return { connect, disconnect, sendFrame, isConnected: clientRef.current?.connected || false }
+    private startStreaming() {
+        if (this.frameInterval) return
+
+        this.streaming = true
+        const INTERVAL = 1000 / this.config.frameRate
+
+        this.frameInterval = window.setInterval(() => { 
+            if (!this.context || !this.canvas || !this.videoElement || !this.client) return
+            this.context.drawImage(
+                this.videoElement,
+                0, 0,
+                this.config.width, this.config.height,
+                0, 0,
+                this.canvas.width, this.canvas.height
+            )
+
+            // header prefix isn't needed
+            const base64Url = this.canvas.toDataURL("image/jpeg", this.config.quality).split(",")[1]
+
+            this.client.publish({
+                destination: "/app/lesson/video-input",
+                body: JSON.stringify({
+                    frameUrl: base64Url
+                })
+            })
+        }, INTERVAL)
+    }
+
 }

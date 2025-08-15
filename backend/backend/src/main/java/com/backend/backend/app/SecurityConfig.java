@@ -39,7 +39,6 @@ class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/login/oauth2/code/**").permitAll()
-                        .requestMatchers("/ws-learn-asl/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
