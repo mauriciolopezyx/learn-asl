@@ -44,18 +44,14 @@ export class websocketManager {
                 this.startStreaming()
                 client.subscribe(this.config.endpoint, (message: IMessage) => {
                     const response = JSON.parse(message.body)
-                    console.log("rec response 1")
                     if (!response) return
-                    console.log("rec response 2")
                     if (response.wireframe) {
-                        console.log("rec response 3")
                         const imgElement = document.getElementById("wireframe-display") as HTMLImageElement
                         if (!imgElement) return
                         imgElement.src = `data:image/jpeg;base64,${response.wireframe}`
                     }
 
                     if (responseHandler) {
-                        console.log("Received websocket response, invoking")
                         responseHandler(response)
                     }
                 })
