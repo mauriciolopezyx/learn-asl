@@ -99,7 +99,7 @@ export default function CameraStreamingManager({onPrediction}: {onPrediction: (p
         const lesson = 1
         const config: websocketConfig = {
             endpoint: `/user/topic/lesson/${lesson}`,
-            frameRate: 4,
+            frameRate: 5,
             quality: 0.85,
             width: 350,
             height: 350
@@ -156,7 +156,7 @@ export default function CameraStreamingManager({onPrediction}: {onPrediction: (p
             ?
             <div className="flex justify-between">
                 <h3 className="bg-gray-300 dark:bg-gray-600 p-2 rounded-md shadow-md">
-                    Confidence: <span className="font-bold">{`${Math.round(predictionInfo.confidence * 10000) / 100}%`}</span>
+                    Confidence: <span className="font-bold">{`${Math.round(predictionInfo.confidence * 100000) / 100}%`}</span>
                 </h3>
                 <h4 className="bg-gray-300 dark:bg-gray-600 p-2 rounded-md shadow-md">
                    Predicted: <span className="font-bold">{predictionInfo.prediction}</span>
@@ -169,7 +169,7 @@ export default function CameraStreamingManager({onPrediction}: {onPrediction: (p
                 autoPlay 
                 playsInline
                 muted
-                className={`w-full bg-black h-[350px] object-cover block ${active ? "block" : "hidden"}`}
+                className={`w-full bg-black h-[350px] scale-x-[-1] object-cover block ${active ? "block" : "hidden"}`}
             />
             {!active ?
             <div className="w-full h-[350px] bg-black flex flex-col justify-center items-center gap-4">

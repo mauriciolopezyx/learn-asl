@@ -43,7 +43,7 @@ export function VerifyForm() {
 
     const verifyEndpoint = forgotPassword ? "http://localhost:8080/auth/forgot-password/code" : "http://localhost:8080/auth/verify"
     const resendEndpoint = forgotPassword ? "http://localhost:8080/auth/forgot-password/code/resend" : "http://localhost:8080/auth/resend"
-    const redirectUrl = forgotPassword ? "/reset-password" : "/dashboard"
+    const redirectUrl = forgotPassword ? "/reset-password" : "/home"
 
     console.log("forget password?", forgotPassword)
     

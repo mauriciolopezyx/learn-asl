@@ -89,6 +89,13 @@ export class websocketManager {
 
         this.frameInterval = window.setInterval(() => { 
             if (!this.context || !this.canvas || !this.videoElement || !this.client) return
+            
+            this.context.save()
+
+            // Mirror horizontally
+            this.context.translate(this.canvas.width, 0)
+            this.context.scale(-1, 1)
+
             this.context.drawImage(
                 this.videoElement,
                 0, 0,
@@ -96,6 +103,8 @@ export class websocketManager {
                 0, 0,
                 this.canvas.width, this.canvas.height
             )
+
+            this.context.restore()
 
             // header prefix isn't needed
             const base64Url = this.canvas.toDataURL("image/jpeg", this.config.quality).split(",")[1]

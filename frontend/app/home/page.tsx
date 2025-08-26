@@ -21,7 +21,13 @@ export default function HomePage() {
                     <div className="w-full max-w-[350px] flex flex-col gap-6">
                         <CameraStreamingManager onPrediction={onPrediction} />
                     </div>
-                    <img id="wireframe-display" width={350} height={350} className="max-h-[350px]"/>
+                    <div className="w-full max-w-[350px] flex flex-col gap-6">
+                        <div className="flex justify-center">
+                            <h3 className="bg-gray-300 px-8 dark:bg-gray-600 p-2 rounded-md shadow-md font-bold">Server</h3>
+                        </div>
+                        <img id="wireframe-display" width={350} height={350}/>
+                        <div className="w-full h-[60px]"></div>
+                    </div>
                 </div>
             </div>
         </>

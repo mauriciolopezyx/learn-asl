@@ -3,7 +3,9 @@ package com.backend.backend.app;
 import com.backend.backend.auth.OAuth2Handler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -32,13 +34,29 @@ class SecurityConfig {
     }
 
     @Bean
+    @Order(1)
+    public SecurityFilterChain prometheusFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/actuator/prometheus")  // Only this exact path
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().hasAnyAuthority("ADMIN", "PROMETHEUS")  // Use anyRequest() here
+                )
+                .httpBasic(Customizer.withDefaults())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // No sessions for this chain
+                )
+                .csrf(csrf -> csrf.disable());
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/login/oauth2/code/**").permitAll()
+                        .requestMatchers("/auth/**", "/login/oauth2/code/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
