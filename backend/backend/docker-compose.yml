@@ -16,6 +16,8 @@ services:
       - "9090:9090"
     volumes:
       - ../../etc/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../../etc/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - prometheus_data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
 
@@ -25,6 +27,8 @@ services:
     restart: unless-stopped
     ports:
       - "3100:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
@@ -33,5 +37,16 @@ services:
     depends_on:
       - prometheus
 
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    container_name: alertmanager-asl
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      - ../../etc/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+
 volumes:
   redis_data:
+  prometheus_data:
+  grafana_data:

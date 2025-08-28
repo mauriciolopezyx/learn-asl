@@ -1,0 +1,11 @@
+groups:
+  - name: frame_alerts
+    rules:
+      - alert: FrameOverload
+        expr: sum(rate(camera_frames_received_total[1m])) > 15
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          title: "High total frame rate"
+          description: "The server is currently receiving an average of 15+ frames per second over the past minute. For testing purposes, the expected rate for one user is ~5 frames per second. (actual: {{ $value }})"

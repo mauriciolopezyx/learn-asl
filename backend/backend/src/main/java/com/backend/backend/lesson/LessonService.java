@@ -1,5 +1,6 @@
 package com.backend.backend.lesson;
 
+import com.backend.backend.app.CustomMetrics;
 import com.backend.backend.lesson.dto.PredictionResponse;
 import com.backend.backend.lesson.dto.VideoFrameDto;
 import com.backend.backend.lesson.dto.WireframeResponse;
@@ -17,13 +18,16 @@ public class LessonService {
 
     private final RestTemplate restTemplate;
     private final SimpMessagingTemplate messagingTemplate;
+    private final CustomMetrics customMetrics;
 
     public LessonService(
             RestTemplateBuilder builder,
-            SimpMessagingTemplate simpMessagingTemplate
+            SimpMessagingTemplate simpMessagingTemplate,
+            CustomMetrics customMetrics
     ) {
         this.restTemplate = builder.build();
         this.messagingTemplate = simpMessagingTemplate;
+        this.customMetrics = customMetrics;
     }
 
     public void processVideoFrame(
@@ -32,21 +36,14 @@ public class LessonService {
             String username
     ) {
         try {
-//            PredictionResponse response = restTemplate.postForObject(
-//                    "http://localhost:5000/predict",
-//                    videoFrameDto,
-//                    PredictionResponse.class
-//            );
-
             WireframeResponse result = restTemplate.postForObject(
                     "http://localhost:5000/predict",
                     videoFrameDto,
                     WireframeResponse.class
             );
-
             assert result != null;
-            //System.out.println("Flask prediction: " + response.prediction() + " with " + response.confidence() + "% confidence");
 
+            customMetrics.recordFrame(username);
             messagingTemplate.convertAndSendToUser(username, "/topic/lesson/1", result);
 
         } catch (Exception e) {
