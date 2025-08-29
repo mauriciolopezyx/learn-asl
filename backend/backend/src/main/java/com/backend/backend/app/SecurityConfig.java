@@ -3,6 +3,7 @@ package com.backend.backend.app;
 import com.backend.backend.auth.OAuth2Handler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@Profile("!test")
 class SecurityConfig {
 
     private final AuthenticationProvider authenticationProvider;

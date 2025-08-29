@@ -52,6 +52,7 @@ class AuthService {
     public ResponseEntity<?> register(RegisterUserDto input) {
         System.out.println(input.email());
         Optional<User> userFromEmail = userRepository.findByEmail(input.email());
+        System.out.println("worked here 1 ");
         if (userFromEmail.isPresent()) {
             throw new RuntimeException("An account with the given email already exists");
         }
@@ -59,6 +60,7 @@ class AuthService {
         if (userFromName.isPresent()) {
             throw new RuntimeException("An account with the given username already exists");
         }
+        System.out.println("worked here 2 ");
         User user = new User(input.username(), input.email(), passwordEncoder.encode(input.password()));
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));

@@ -27,11 +27,12 @@ class AuthController {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body("Validation failed");
         }
+        System.out.println("Received register attempt with " + registerUserDto.email() + " and password " + registerUserDto.password());
         try {
             return authService.register(registerUserDto);
         } catch (RuntimeException e) {
             System.out.println(e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
