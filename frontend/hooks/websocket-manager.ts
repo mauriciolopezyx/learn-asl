@@ -108,7 +108,7 @@ export class websocketManager {
 
             // header prefix isn't needed
             const base64Url = this.canvas.toDataURL("image/jpeg", this.config.quality).split(",")[1]
-
+            
             this.client.publish({
                 destination: "/app/lesson/video-input",
                 body: JSON.stringify({
