@@ -33,3 +33,5 @@ jobs:
         registry: docker.io
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
+        directory: backend/backend
+        dockerfile: backend/backend/Dockerfile
